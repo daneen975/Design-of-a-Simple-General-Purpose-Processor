@@ -1,0 +1,70 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.numeric_std.ALL;
+
+entity ALU2 is
+    Port (
+        Clock : in std_logic;
+        A, B : in unsigned(7 downto 0);        -- Input A and B
+        student_id : in unsigned(3 downto 0); -- Student ID input
+        OP : in unsigned(15 downto 0);        -- Opcode input
+        Neg : out std_logic;                   -- Negative flag output
+        R1 : out unsigned(3 downto 0);        -- Output R1
+        R2 : out unsigned(3 downto 0)         -- Output R2
+    );
+end ALU2;
+
+architecture CALCULATION of ALU2 is
+    signal Result : unsigned(7 downto 0) := (others => '0'); -- Result signal
+begin
+    process(Clock)
+    begin    
+        if rising_edge(Clock) then
+            case OP is 
+                when "0000000000000001" => 
+                    -- Replace the odd bits of A with odd bits of B
+                    Result <= (A(7 downto 6) & B(5 downto 4) & A(3 downto 0)); 
+
+                when "0000000000000010" => 
+                    -- Produce the result of NANDing A and B
+                    Result <= not (A and B); 
+
+                when "0000000000000011" => 
+                    -- Calculate the summation of A and B and decrease it by 5
+                    Result <= (A + B) - "00000101"; 
+
+                when "0000000000000100" => 
+                    -- Produce the 2’s complement of B
+                    Result <= not B + "00000001"; 
+
+                when "0000000000000101" => 
+                    -- Invert the even bits of B
+                    Result <= (B(7) & not B(6) & B(5) & not B(4) & 
+                               B(3) & not B(2) & B(1) & not B(0));
+
+                when "0000000000000110" => 
+                    -- Shift A to left by 2 bits (SHL)
+                    Result <= A sll 2; 
+
+                when "0000000000000111" => 
+                    -- Produce null on the output
+                    Result <= (others => '0'); 
+
+                when "0000000000001000" => 
+                    -- Produce the 2’s complement of A
+                    Result <= not A + "00000001"; 
+
+                when others =>
+                    Result <= (others => '0'); -- Default case: zero output
+            end case;
+        end if;
+    end process;
+
+    -- Assign outputs R1 and R2 based on Result
+    R1 <= Result(3 downto 0); -- Lower nibble for R1
+    R2 <= Result(7 downto 4); -- Upper nibble for R2
+
+    -- Set Neg output based on MSB of Result
+    Neg <= Result(7); -- Set Neg to indicate if result is negative
+
+end CALCULATION;

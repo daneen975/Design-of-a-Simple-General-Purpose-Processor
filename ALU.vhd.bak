@@ -1,0 +1,48 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_unsigned.ALL;  -- Allows for unsigned arithmetic operations
+USE ieee.numeric_std.ALL;
+
+entity ALU is
+    Port (
+        clock : in std_logic;
+		  res : in std_logic;                    -- Reset signal
+        A : in unsigned(7 downto 0);       -- First operand as unsigned
+        B : in unsigned(7 downto 0);       -- Second operand as unsigned
+        OP : in std_logic_vector(15 downto 0);     -- 16-bit opcode input
+        neg : out std_logic;                        -- Negative flag output
+        R1 : out std_logic_vector(3 downto 0);     -- Output R1 (upper nibble)
+        R2 : out std_logic_vector(3 downto 0)      -- Output R2 (lower nibble)
+    );
+end ALU;
+
+architecture calculation of ALU is
+    signal Reg1, Reg2, Result : unsigned(7 downto 0); -- Declare Reg1, Reg2, and Result as unsigned
+begin
+    process (clock)
+    begin
+        if rising_edge(clock) then
+            Reg1 <= A;  -- Store input A into Reg1
+            Reg2 <= B;  -- Store input B into Reg2
+            
+            case OP is
+					 when "1000000000000000" => Result <= null; -- Nothing
+                when "0000000000000001" => Result <= Reg1 + Reg2; -- Sum
+                when "0000000000000010" => Result <= Reg1 - Reg2;  -- Difference
+                when "0000000000000100" => Result <= not(Reg1);    -- Inversion of A
+                when "0000000000001000" => Result <= not(Reg1 and Reg2);   -- NAND (A AND NOT B)
+                when "0000000000010000" => Result <= not(Reg1 or Reg2);  -- NOR (NOT A OR NOT B)
+                when "0000000000100000" => Result <= Reg1 and Reg2;  -- AND
+                when "0000000001000000" => Result <= Reg1 xor Reg2;  -- XOR
+                when "0000000010000000" => Result <= Reg1 or Reg2;   -- OR
+                when others => Result <= (others => '0'); -- Default case: zero output
+            end case;
+        end if;
+    end process;
+
+                           
+    R1 <= std_logic_vector(Result(7 downto 4));  -- Convert upper nibble of result for R1 output
+    R2 <= std_logic_vector(Result(3 downto 0));  -- Convert lower nibble of result for R2 output
+	 Neg<= '0'; -- Positive number
+
+end calculation;

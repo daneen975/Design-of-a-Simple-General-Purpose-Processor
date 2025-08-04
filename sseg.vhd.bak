@@ -1,0 +1,39 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
+entity sseg is
+    Port ( bcd : in  STD_LOGIC_VECTOR (3 downto 0);
+           sign : in  STD_LOGIC;
+           leds_right : out STD_LOGIC_VECTOR (6 downto 0);
+           leds_left : out STD_LOGIC_VECTOR (6 downto 0));
+end sseg;
+
+architecture Behavior of sseg is
+begin
+    process(bcd, sign)
+    begin
+        -- Display BCD digit on right 7-segment display
+        case bcd is
+            when "0000" => leds_right <= NOT "1000000"; -- 0
+            when "0001" => leds_right <= NOT "1111001"; -- 1
+            when "0010" => leds_right <= NOT "0100100"; -- 2
+            when "0011" => leds_right <= NOT "0110000"; -- 3
+            when "0100" => leds_right <= NOT "0011001"; -- 4
+            when "0101" => leds_right <= NOT "0010010"; -- 5
+            when "0110" => leds_right <= NOT "0000010"; -- 6
+            when "0111" => leds_right <= NOT "1111000"; -- 7
+            when "1000" => leds_right <= NOT "0000000"; -- 8
+            when "1001" => leds_right <= NOT "0010000"; -- 9
+            when others => leds_right <= NOT "1111111"; -- off
+        end case;
+
+        -- Display sign on left 7-segment display
+        if sign = '1' then
+            leds_left <= "0111111"; -- negative sign (middle segment on)
+        else
+            leds_left <= "1111111"; -- positive sign (all segments off)
+        end if;
+    end process;
+end Behavior;
+
